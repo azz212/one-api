@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/songquanpeng/one-api/common"
 	"github.com/songquanpeng/one-api/common/config"
+	"github.com/songquanpeng/one-api/common/message"
 	"github.com/songquanpeng/one-api/model"
 	"net/http"
 	"strings"
@@ -17,23 +18,30 @@ func GetStatus(c *gin.Context) {
 		"success": true,
 		"message": "",
 		"data": gin.H{
-			"version":             common.Version,
-			"start_time":          common.StartTime,
-			"email_verification":  config.EmailVerificationEnabled,
-			"github_oauth":        config.GitHubOAuthEnabled,
-			"github_client_id":    config.GitHubClientId,
-			"system_name":         config.SystemName,
-			"logo":                config.Logo,
-			"footer_html":         config.Footer,
-			"wechat_qrcode":       config.WeChatAccountQRCodeImageURL,
-			"wechat_login":        config.WeChatAuthEnabled,
-			"server_address":      config.ServerAddress,
-			"turnstile_check":     config.TurnstileCheckEnabled,
-			"turnstile_site_key":  config.TurnstileSiteKey,
-			"top_up_link":         config.TopUpLink,
-			"chat_link":           config.ChatLink,
-			"quota_per_unit":      config.QuotaPerUnit,
-			"display_in_currency": config.DisplayInCurrencyEnabled,
+			"version":                     common.Version,
+			"start_time":                  common.StartTime,
+			"email_verification":          config.EmailVerificationEnabled,
+			"github_oauth":                config.GitHubOAuthEnabled,
+			"github_client_id":            config.GitHubClientId,
+			"lark_client_id":              config.LarkClientId,
+			"system_name":                 config.SystemName,
+			"logo":                        config.Logo,
+			"footer_html":                 config.Footer,
+			"wechat_qrcode":               config.WeChatAccountQRCodeImageURL,
+			"wechat_login":                config.WeChatAuthEnabled,
+			"server_address":              config.ServerAddress,
+			"turnstile_check":             config.TurnstileCheckEnabled,
+			"turnstile_site_key":          config.TurnstileSiteKey,
+			"top_up_link":                 config.TopUpLink,
+			"chat_link":                   config.ChatLink,
+			"quota_per_unit":              config.QuotaPerUnit,
+			"display_in_currency":         config.DisplayInCurrencyEnabled,
+			"oidc":                        config.OidcEnabled,
+			"oidc_client_id":              config.OidcClientId,
+			"oidc_well_known":             config.OidcWellKnown,
+			"oidc_authorization_endpoint": config.OidcAuthorizationEndpoint,
+			"oidc_token_endpoint":         config.OidcTokenEndpoint,
+			"oidc_userinfo_endpoint":      config.OidcUserinfoEndpoint,
 		},
 	})
 	return
@@ -110,7 +118,7 @@ func SendEmailVerification(c *gin.Context) {
 	content := fmt.Sprintf("<p>您好，你正在进行%s邮箱验证。</p>"+
 		"<p>您的验证码为: <strong>%s</strong></p>"+
 		"<p>验证码 %d 分钟内有效，如果不是本人操作，请忽略。</p>", config.SystemName, code, common.VerificationValidMinutes)
-	err := common.SendEmail(subject, email, content)
+	err := message.SendEmail(subject, email, content)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -149,7 +157,7 @@ func SendPasswordResetEmail(c *gin.Context) {
 		"<p>点击 <a href='%s'>此处</a> 进行密码重置。</p>"+
 		"<p>如果链接无法点击，请尝试点击下面的链接或将其复制到浏览器中打开：<br> %s </p>"+
 		"<p>重置链接 %d 分钟内有效，如果不是本人操作，请忽略。</p>", config.SystemName, link, link, common.VerificationValidMinutes)
-	err := common.SendEmail(subject, email, content)
+	err := message.SendEmail(subject, email, content)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
